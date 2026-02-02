@@ -34,6 +34,7 @@ export default function TabsLayout() {
           marginHorizontal: 4,
         },
         tabBarInactiveBackgroundColor: "transparent",
+        headerTitleAlign: 'center',
       }}>
       <Tabs.Screen
         name="Cleoh"
@@ -42,7 +43,8 @@ export default function TabsLayout() {
           headerTitleStyle: {
             fontFamily: "ArtistFont",
             color: "white",
-            textAlign: "center",
+            fontSize: 16,
+            lineHeight: 24,
           },
           tabBarLabel: "Cleoh",
           headerStyle: {
@@ -66,11 +68,10 @@ export default function TabsLayout() {
           headerTitleStyle: {
             fontFamily: "BatmanFont",
             color: "white",
-            textAlign: "center",
-            fontSize: 16
+            fontSize: 16,
+            lineHeight: 24,
           },
           tabBarLabel: "Matthew",
-
           headerStyle: {
             backgroundColor: "black",
           },
@@ -89,6 +90,7 @@ export default function TabsLayout() {
         name="PomodoroTimer"
         options={{
           headerShown: false,
+          tabBarLabel: "Pomodoro",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="timer" size={size} color={color} />
           ),
@@ -106,7 +108,6 @@ export default function TabsLayout() {
               source={require('../../assets/icons/finger-cursor-material-svgrepo-com.png')}
               style={{ width: size, height: size }}
               resizeMode="contain" />
-
           ),
           tabBarActiveBackgroundColor: "#807c7c9a",
           tabBarActiveTintColor: "black"
@@ -114,11 +115,11 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="Messages"
+        name="More"
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbox" size={size} color={color} />
+            <Ionicons name="apps" size={size} color={color} />
           ),
           tabBarActiveBackgroundColor: "#807c7c9a",
           tabBarActiveTintColor: "black"

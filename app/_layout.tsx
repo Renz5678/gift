@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { SplashScreen, Stack, usePathname } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,9 +31,13 @@ export default function RootLayout() {
 
 function CustomHeader() {
   const insets = useSafeAreaInsets();
+  const pathname = usePathname();
+
+  // Change color only for /Matthew route
+  const headerColor = pathname.includes('/Matthew') ? '#000923' : '#dc5454';
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top }]}>
+    <View style={[styles.header, { paddingTop: insets.top, backgroundColor: headerColor }]}>
       <Text style={styles.headerTitle}>Mayo!</Text>
     </View>
   );
@@ -41,8 +45,7 @@ function CustomHeader() {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: "#dc5454",
-    height: 90, // Your custom height (will be added to the safe area inset)
+    height: 90,
     justifyContent: "center",
     alignItems: "center",
   },

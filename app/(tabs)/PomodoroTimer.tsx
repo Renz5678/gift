@@ -2,10 +2,9 @@ import {
     calculateTimerComplete,
     formatTime,
     getCyclesUntilLongBreak,
-    getModeColor,
     getModeText,
     TimerMode,
-    validateTimerInput,
+    validateTimerInput
 } from '@/utils/pomodoroTimer'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Modal, Pressable, Text, TextInput, View } from 'react-native'
@@ -99,16 +98,16 @@ const PomodoroTimer = () => {
     }
 
     return (
-        <View className="p-4 gap-4">
+        <View className="p-4 gap-4 mt-28">
             {/* Timer Display */}
-            <View className={`w-full p-8 rounded-2xl ${getModeColor(mode)}`}>
-                <Text className="text-center text-white text-lg font-semibold mb-2">
+            <View className={`w-full p-8 rounded-2xl`}>
+                <Text className="text-center text-gray text-xl font-semibold mb-2">
                     {getModeText(mode)}
                 </Text>
-                <Text className="text-center text-white text-6xl font-bold mb-4">
+                <Text className="text-center text-gray text-6xl font-bold mb-4">
                     {formatTime(timeLeft)}
                 </Text>
-                <Text className="text-center text-white text-sm">
+                <Text className="text-center text-gray text-sm">
                     Cycle: {cycleCount} | Next long break: {getCyclesUntilLongBreak(cycleCount)}{' '}
                     cycles
                 </Text>
@@ -117,7 +116,7 @@ const PomodoroTimer = () => {
             {/* Control Buttons */}
             <View className="flex-row gap-2">
                 <Pressable
-                    className="flex-1 h-14 bg-blue-500 flex justify-center items-center rounded-xl"
+                    className="flex-1 h-14 bg-red-400 flex justify-center items-center rounded-xl"
                     onPress={isRunning ? pauseTimer : startTimer}
                 >
                     <Text className="font-bold text-white text-lg">
@@ -126,7 +125,7 @@ const PomodoroTimer = () => {
                 </Pressable>
 
                 <Pressable
-                    className="flex-1 h-14 bg-gray-500 flex justify-center items-center rounded-xl"
+                    className="flex-1 h-14 bg-gray-400 flex justify-center items-center rounded-xl"
                     onPress={resetTimer}
                 >
                     <Text className="font-bold text-white text-lg">Reset</Text>

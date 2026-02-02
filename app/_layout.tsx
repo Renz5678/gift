@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, usePathname } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function RootLayout() {
@@ -32,14 +32,29 @@ export default function RootLayout() {
 function CustomHeader() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
+  const colorAnim = useRef(new Animated.Value(0)).current;
 
-  // Change color only for /Matthew route
-  const headerColor = pathname.includes('/Matthew') ? '#000923' : '#dc5454';
+  // Determine target color based on pathname
+  const isMatthewRoute = pathname.includes('/Matthew');
+
+  useEffect(() => {
+    Animated.timing(colorAnim, {
+      toValue: isMatthewRoute ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false, // Color animations don't support native driver
+    }).start();
+  }, [isMatthewRoute]);
+
+  // Interpolate between the two colors
+  const backgroundColor = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#dc5454', '#000923'], // red to dark blue
+  });
 
   return (
-    <View style={[styles.header, { paddingTop: insets.top, backgroundColor: headerColor }]}>
+    <Animated.View style={[styles.header, { paddingTop: insets.top, backgroundColor }]}>
       <Text style={styles.headerTitle}>Mayo!</Text>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -1,28 +1,17 @@
-import { useFonts } from "expo-font";
-import { SplashScreen } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
-
-SplashScreen.preventAutoHideAsync();
+import MatthewCard from "@/components/MatthewCard";
+import React from 'react';
+import { ScrollView, View } from 'react-native';
+import '../../global.css';
 
 const Matthew = () => {
-    const [loaded] = useFonts({
-        BatmanFont: require("../../assets/fonts/UncialAntiqua-Regular.ttf")
-    });
-
-    useEffect(() => {
-        if (loaded) {
-            SplashScreen.hideAsync();
-        }
-    }, [loaded]);
-
-    if (!loaded) return null;
-
     return (
-        <View>
-            <Text>Renz</Text>
-        </View>
+        <ScrollView className="flex-1">
+            <View className="p-6 items-start justify-start">
+                <MatthewCard title="Hello" description="Hello baby!" date="12-02-06" />
+            </View>
+        </ScrollView>
     )
 }
 
 export default Matthew
+

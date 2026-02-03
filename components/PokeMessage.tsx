@@ -62,7 +62,7 @@ const PokeMessage = ({
 
                         <View className='p-6 h-36 pt-8'>
                             <Text className='text-gray-600 mb-6'>
-                                Send <Text className='italic font-bold'>{message}</Text>?
+                                Send <Text className='italic font-bold'>{message}</Text>  ?
                             </Text>
 
                             <View className='flex-row gap-3'>

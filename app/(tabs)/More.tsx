@@ -2,12 +2,12 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import '../../global.css';
 
-const Messages = () => {
+const More = () => {
     return (
         <View className="p-4">
-            <Text>messages</Text>
+            <Text>More</Text>
         </View>
     )
 }
 
-export default Messages
+export default More

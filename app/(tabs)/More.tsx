@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import '../../global.css';
@@ -11,13 +12,14 @@ const More = () => {
                         <Text className='text-white font-bold text-2xl'>Games</Text>
                     </View>
 
-                    <Pressable className='p-4 border-2 border-red-400 w-full h-20 justify-center'>
+                    <Pressable className='p-4 border-2 border-red-400 w-full h-20 justify-center'
+                        onPress={() => router.push('/Games/Tetris')}>
                         <Text className='text-xl'>
                             Titres
                         </Text>
                     </Pressable>
 
-                    <Pressable className='p-4 border-2 border-b-2 rounded-b-2xl border-red-400 w-full h-20 justify-center'>
+                    <Pressable className='p-4 border-l-2 border-r-2 border-b-2 rounded-b-2xl border-red-400 w-full h-20 justify-center'>
                         <Text className='text-xl'>
                             Flovey Bird
                         </Text>

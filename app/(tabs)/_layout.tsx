@@ -106,6 +106,7 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: 'white',
           paddingVertical: 5,

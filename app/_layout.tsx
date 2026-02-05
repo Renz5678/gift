@@ -1,8 +1,10 @@
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import LoginScreen from "./auth/LoginScreen";
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -16,6 +18,36 @@ export default function RootLayout() {
   }, [loaded]);
 
   if (!loaded) return null;
+
+  return (
+    <AuthProvider>
+      <AuthenticatedApp />
+    </AuthProvider>
+  );
+}
+
+function AuthenticatedApp() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#dc5454" />
+      </View>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
+
+  return <MainApp />;
+}
+
+function MainApp() {
+  // Initialize poke notifications
+  const { usePokeNotifications } = require('@/hooks/usePokeNotifications');
+  usePokeNotifications();
 
   return (
     <Stack>

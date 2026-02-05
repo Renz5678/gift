@@ -1,6 +1,8 @@
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, Text, View } from 'react-native';
 
 const PokeMessage = ({
     message,
@@ -12,11 +14,51 @@ const PokeMessage = ({
     onPress: () => void;
 }) => {
     const [showModal, setShowModal] = useState(false);
+    const [sending, setSending] = useState(false);
+    const { userEmail } = useAuth();
 
-    const handleSend = () => {
-        console.log('Sending:', message);
-        setShowModal(false);
-        // Add your send logic here
+    const handleSend = async () => {
+        setSending(true);
+
+        try {
+            // Get partner email from user_pairs
+            const { data: pairData, error: pairError } = await supabase
+                .from('user_pairs')
+                .select('partner_email')
+                .eq('user_email', userEmail)
+                .single();
+
+            if (pairError || !pairData) {
+                Alert.alert('Error', 'You need to pair with your partner first!');
+                setSending(false);
+                return;
+            }
+
+            // Send poke to database
+            const { error: pokeError } = await supabase
+                .from('pokes')
+                .insert([
+                    {
+                        sender_email: userEmail,
+                        receiver_email: pairData.partner_email,
+                        message: message
+                    }
+                ]);
+
+            if (pokeError) {
+                Alert.alert('Error', 'Failed to send poke. Please try again.');
+                console.error('Poke error:', pokeError);
+            } else {
+                Alert.alert('Sent! 💕', 'Your poke has been sent to your partner!');
+                setShowModal(false);
+                onPress(); // Deselect the message
+            }
+        } catch (error) {
+            console.error('Error sending poke:', error);
+            Alert.alert('Error', 'Something went wrong. Please try again.');
+        } finally {
+            setSending(false);
+        }
     };
 
     return (
@@ -50,7 +92,7 @@ const PokeMessage = ({
             >
                 <Pressable
                     className='flex-1 justify-center items-center bg-black/50'
-                    onPress={() => setShowModal(false)}
+                    onPress={() => !sending && setShowModal(false)}
                 >
                     <Pressable
                         className='bg-white rounded-2xl w-4/5'
@@ -69,6 +111,7 @@ const PokeMessage = ({
                                 <Pressable
                                     className='flex-1 bg-gray-200 p-3 rounded-lg'
                                     onPress={() => setShowModal(false)}
+                                    disabled={sending}
                                 >
                                     <Text className='text-center font-semibold'>Cancel</Text>
                                 </Pressable>
@@ -76,8 +119,13 @@ const PokeMessage = ({
                                 <Pressable
                                     className='flex-1 bg-red-400 p-3 rounded-lg'
                                     onPress={handleSend}
+                                    disabled={sending}
                                 >
-                                    <Text className='text-center font-semibold text-white'>Send</Text>
+                                    {sending ? (
+                                        <ActivityIndicator color="white" />
+                                    ) : (
+                                        <Text className='text-center font-semibold text-white'>Send</Text>
+                                    )}
                                 </Pressable>
                             </View>
                         </View>

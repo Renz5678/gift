@@ -8,6 +8,11 @@ export default function GameLayout() {
                 options={{
                     headerShown: false
                 }} />
+            <Stack.Screen
+                name="FloveyBird"
+                options={{
+                    headerShown: false
+                }} />
         </Stack>
     );
 }

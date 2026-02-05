@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
 import { Block, BlockShape, BoardShape, EmptyCell, SHAPES } from '../utils/types';
 import { useInterval } from './useInterval';
@@ -11,26 +12,33 @@ import {
 
 const MAX_HIGH_SCORES = 10;
 
-export function saveHighScore(score: number): void {
-    const existingScores = JSON.parse(localStorage.getItem('highScores') || '[]');
-    existingScores.push(score);
-    const updatedScores = existingScores
-        .sort((a: number, b: number) => b - a)
-        .slice(0, MAX_HIGH_SCORES);
-    localStorage.setItem('highScores', JSON.stringify(updatedScores));
+// Replace localStorage with AsyncStorage
+export async function saveHighScore(score: number): Promise<void> {
+    try {
+        const existing = await AsyncStorage.getItem('highScores');
+        const existingScores = JSON.parse(existing || '[]');
+        existingScores.push(score);
+        const updatedScores = existingScores
+            .sort((a: number, b: number) => b - a)
+            .slice(0, MAX_HIGH_SCORES);
+        await AsyncStorage.setItem('highScores', JSON.stringify(updatedScores));
+    } catch (error) {
+        console.error('Error saving high score:', error);
+    }
 }
 
-export function getHighScores(): number[] {
+export async function getHighScores(): Promise<number[]> {
     try {
-        const scores = JSON.parse(localStorage.getItem('highScores') || '[]');
-        return Array.isArray(scores) ? scores.sort((a, b) => b - a).slice(0, MAX_HIGH_SCORES) : [];
+        const scores = await AsyncStorage.getItem('highScores');
+        const parsed = JSON.parse(scores || '[]');
+        return Array.isArray(parsed) ? parsed.sort((a, b) => b - a).slice(0, MAX_HIGH_SCORES) : [];
     } catch {
         return [];
     }
 }
 
 enum TickSpeed {
-    Normal = 800,
+    Normal = 1000,
     Sliding = 100,
     Fast = 50,
 }
@@ -41,11 +49,17 @@ export function useTetris() {
     const [isCommitting, setIsCommitting] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
+    const [highScores, setHighScores] = useState<number[]>([]);
 
     const [
         { board, droppingRow, droppingColumn, droppingBlock, droppingShape },
         dispatchBoardState,
     ] = useTetrisBoard();
+
+    // Load high scores on mount
+    useEffect(() => {
+        getHighScores().then(setHighScores);
+    }, []);
 
     const startGame = useCallback(() => {
         const startingBlocks = [
@@ -90,7 +104,9 @@ export function useTetris() {
         newUpcomingBlocks.unshift(getRandomBlock());
 
         if (hasCollisions(board, SHAPES[newBlock].shape, 0, 3)) {
-            saveHighScore(score);
+            saveHighScore(score).then(() => {
+                getHighScores().then(setHighScores);
+            });
             setIsPlaying(false);
             setTickSpeed(null);
         } else {
@@ -143,83 +159,31 @@ export function useTetris() {
         gameTick();
     }, tickSpeed);
 
-    useEffect(() => {
-        if (!isPlaying) {
-            return;
-        }
-
-        let isPressingLeft = false;
-        let isPressingRight = false;
-        let moveIntervalID: ReturnType<typeof setInterval> | undefined;
-
-        const updateMovementInterval = () => {
-            clearInterval(moveIntervalID);
-            dispatchBoardState({
-                type: 'move',
-                isPressingLeft,
-                isPressingRight,
-            });
-            moveIntervalID = setInterval(() => {
-                dispatchBoardState({
-                    type: 'move',
-                    isPressingLeft,
-                    isPressingRight,
-                });
-            }, 300);
-        };
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.repeat) {
-                return;
-            }
-
-            if (event.key === 'ArrowDown') {
-                setTickSpeed(TickSpeed.Fast);
-            }
-
-            if (event.key === 'ArrowUp') {
-                dispatchBoardState({
-                    type: 'move',
-                    isRotating: true,
-                });
-            }
-
-            if (event.key === 'ArrowLeft') {
-                isPressingLeft = true;
-                updateMovementInterval();
-            }
-
-            if (event.key === 'ArrowRight') {
-                isPressingRight = true;
-                updateMovementInterval();
-            }
-        };
-
-        const handleKeyUp = (event: KeyboardEvent) => {
-            if (event.key === 'ArrowDown') {
-                setTickSpeed(TickSpeed.Normal);
-            }
-
-            if (event.key === 'ArrowLeft') {
-                isPressingLeft = false;
-                updateMovementInterval();
-            }
-
-            if (event.key === 'ArrowRight') {
-                isPressingRight = false;
-                updateMovementInterval();
-            }
-        };
-
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('keyup', handleKeyUp);
-            clearInterval(moveIntervalID);
-            setTickSpeed(TickSpeed.Normal);
-        };
+    // Export control functions for buttons to use
+    const moveLeft = useCallback(() => {
+        if (!isPlaying) return;
+        dispatchBoardState({ type: 'move', isPressingLeft: true, isPressingRight: false });
     }, [dispatchBoardState, isPlaying]);
+
+    const moveRight = useCallback(() => {
+        if (!isPlaying) return;
+        dispatchBoardState({ type: 'move', isPressingLeft: false, isPressingRight: true });
+    }, [dispatchBoardState, isPlaying]);
+
+    const rotate = useCallback(() => {
+        if (!isPlaying) return;
+        dispatchBoardState({ type: 'move', isRotating: true });
+    }, [dispatchBoardState, isPlaying]);
+
+    const moveDown = useCallback(() => {
+        if (!isPlaying) return;
+        setTickSpeed(TickSpeed.Fast);
+    }, [isPlaying]);
+
+    const stopMovingDown = useCallback(() => {
+        if (!isPlaying) return;
+        setTickSpeed(TickSpeed.Normal);
+    }, [isPlaying]);
 
     const renderedBoard = structuredClone(board) as BoardShape;
     if (isPlaying) {
@@ -238,7 +202,13 @@ export function useTetris() {
         isPlaying,
         score,
         upcomingBlocks,
-        highScores: getHighScores(),
+        highScores,
+        // Control functions
+        moveLeft,
+        moveRight,
+        rotate,
+        moveDown,
+        stopMovingDown,
     };
 }
 

@@ -8,7 +8,7 @@ interface Props {
 
 function Board({ currentBoard }: Props) {
     return (
-        <View style={styles.board}>
+        <View style={styles.board} className='w-100 h-100'>
             {currentBoard.map((row, rowIndex) => (
                 <View style={styles.row} key={`row-${rowIndex}`}>
                     {row.map((cell, colIndex) => (
@@ -23,8 +23,8 @@ function Board({ currentBoard }: Props) {
 const styles = StyleSheet.create({
     board: {
         borderWidth: 4,
-        borderColor: '#333',
-        backgroundColor: '#000',
+        borderColor: '#370606',
+        backgroundColor: '#9a3e3e',
     },
     row: {
         flexDirection: 'row',

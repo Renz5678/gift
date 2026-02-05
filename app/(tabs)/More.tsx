@@ -19,7 +19,8 @@ const More = () => {
                         </Text>
                     </Pressable>
 
-                    <Pressable className='p-4 border-l-2 border-r-2 border-b-2 rounded-b-2xl border-red-400 w-full h-20 justify-center'>
+                    <Pressable className='p-4 border-l-2 border-r-2 border-b-2 rounded-b-2xl border-red-400 w-full h-20 justify-center'
+                        onPress={() => router.push('/Games/FloveyBird')}>
                         <Text className='text-xl'>
                             Flovey Bird
                         </Text>

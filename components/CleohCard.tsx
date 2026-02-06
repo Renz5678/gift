@@ -25,7 +25,16 @@ const CleohCard = ({
     authorEmail,
     onDelete,
 }: CleohCardProps) => {
-    const theme = getThemeConfig(authorUsername);
+    // Debug: Log the values being used for theme selection
+    console.log('Theme Debug:', {
+        authorUsername,
+        authorEmail,
+        title,
+    });
+
+    const theme = getThemeConfig(authorUsername, authorEmail);
+    console.log('Selected theme:', theme.type);
+
     const canDelete = currentUserEmail === authorEmail;
 
     const handleDelete = () => {

@@ -122,16 +122,16 @@ export default function TabsLayout() {
         tabBarButton: (props) => <AnimatedTabButton {...props} />,
       }}>
       <Tabs.Screen
-        name="Cleoh"
+        name="Ourchives"
         options={{
-          title: "The Artist's Perspective",
+          title: "Our-chives",
           headerTitleStyle: {
             fontFamily: "ArtistFont",
             color: "white",
             fontSize: 16,
             lineHeight: 24,
           },
-          tabBarLabel: "Our Story",
+          tabBarLabel: "Our-chives",
           headerStyle: {
             backgroundColor: "#e6657a",
           },

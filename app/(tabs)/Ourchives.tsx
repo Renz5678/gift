@@ -1,17 +1,21 @@
 import AddStoryModal from '@/components/AddStoryModal';
 import CleohCard from "@/components/CleohCard";
 import { useAuth } from '@/contexts/AuthContext';
+import { useStoryNotifications } from '@/hooks/useStoryNotifications';
 import { useStoryPosts } from '@/hooks/useStoryPosts';
 import { getFABIcon } from '@/utils/themeUtils';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import '../../global.css';
 
-const Cleoh = () => {
+const Ourchives = () => {
     const { userEmail, username } = useAuth();
     const { posts, loading, error, createPost, deletePost, refreshPosts } = useStoryPosts(userEmail, username);
     const [modalVisible, setModalVisible] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+
+    // Enable story post notifications from partner
+    useStoryNotifications();
 
     const handleRefresh = async () => {
         setRefreshing(true);
@@ -47,8 +51,8 @@ const Cleoh = () => {
                 <View className="p-6 items-start justify-start">
                     {/* Header */}
                     <View className="mb-6 w-full">
-                        <Text className="text-3xl font-bold text-gray-800 mb-2">Our Story</Text>
-                        <Text className="text-gray-600">Shared memories and moments 💕</Text>
+                        <Text className="text-3xl font-bold text-gray-800 mb-2">Our-Chives</Text>
+                        <Text className="text-gray-600">our notes and memoriesss ^__^</Text>
                     </View>
 
                     {/* Loading State */}
@@ -103,7 +107,7 @@ const Cleoh = () => {
                 onPress={() => setModalVisible(true)}
             >
                 <Image
-                    source={getFABIcon(username || '')}
+                    source={getFABIcon(username || '', userEmail || '')}
                     resizeMode="contain"
                     style={{ height: 40, width: 40 }}
                 />
@@ -120,4 +124,4 @@ const Cleoh = () => {
     );
 };
 
-export default Cleoh;
+export default Ourchives;

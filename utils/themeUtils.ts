@@ -41,6 +41,9 @@ export const THEME_CONFIGS: Record<ThemeType, ThemeConfig> = {
     },
 };
 
+// Cache for theme lookups to avoid recalculation
+const themeCache = new Map<string, ThemeType>();
+
 /**
  * Determines the theme based on the username and email
  * @param username - The username of the post author
@@ -48,16 +51,32 @@ export const THEME_CONFIGS: Record<ThemeType, ThemeConfig> = {
  * @returns The theme type ('batman', 'pucca', or 'default')
  */
 export const getUserTheme = (username: string, email?: string): ThemeType => {
+    // Create cache key from username and email
+    const cacheKey = `${username}:${email || ''}`;
+
+    // Check cache first
+    if (themeCache.has(cacheKey)) {
+        return themeCache.get(cacheKey)!;
+    }
+
+    let theme: ThemeType;
+
     // Validate Matthew's theme (both username AND email must match)
     if (username === MATTHEW_USERNAME && email === MATTHEW_EMAIL) {
-        return 'batman';
+        theme = 'batman';
     }
     // Validate Cleoh's theme (both username AND email must match)
     else if (username === CLEOH_USERNAME && email === CLEOH_EMAIL) {
-        return 'pucca';
+        theme = 'pucca';
     }
     // Default theme for everyone else
-    return 'default';
+    else {
+        theme = 'default';
+    }
+
+    // Cache the result
+    themeCache.set(cacheKey, theme);
+    return theme;
 };
 
 /**
@@ -87,4 +106,3 @@ export const getFABIcon = (username: string, email?: string): any => {
     // Default icon for other users
     return 'ionicon-heart';
 };
-

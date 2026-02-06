@@ -66,7 +66,6 @@ export const useStoryPosts = (userEmail: string | null, username: string | null)
                     table: 'story_posts',
                 },
                 (payload) => {
-                    console.log('Real-time INSERT:', payload);
                     const newPost = payload.new as StoryPost;
                     setPosts((currentPosts) => [newPost, ...currentPosts]);
                 }
@@ -79,7 +78,6 @@ export const useStoryPosts = (userEmail: string | null, username: string | null)
                     table: 'story_posts',
                 },
                 (payload) => {
-                    console.log('Real-time UPDATE:', payload);
                     const updatedPost = payload.new as StoryPost;
                     setPosts((currentPosts) =>
                         currentPosts.map((post) =>
@@ -96,16 +94,13 @@ export const useStoryPosts = (userEmail: string | null, username: string | null)
                     table: 'story_posts',
                 },
                 (payload) => {
-                    console.log('Real-time DELETE:', payload);
                     const deletedPost = payload.old as StoryPost;
                     setPosts((currentPosts) =>
                         currentPosts.filter((post) => post.id !== deletedPost.id)
                     );
                 }
             )
-            .subscribe((status) => {
-                console.log('Subscription status:', status);
-            });
+            .subscribe();
 
         return () => {
             supabase.removeChannel(channel);

@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { usePokeNotifications } from '@/hooks/usePokeNotifications';
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack, usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -46,7 +47,6 @@ function AuthenticatedApp() {
 
 function MainApp() {
   // Initialize poke notifications
-  const { usePokeNotifications } = require('@/hooks/usePokeNotifications');
   usePokeNotifications();
 
   return (

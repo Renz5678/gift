@@ -6,18 +6,19 @@ import {
     TimerMode,
     validateTimerInput
 } from '@/utils/pomodoroTimer'
+import { Audio } from 'expo-av'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Modal, Pressable, Text, TextInput, View } from 'react-native'
 
 const PomodoroTimer = () => {
-    // Timer settings
-    const [workMinutes, setWorkMinutes] = useState(25)
-    const [breakMinutes, setBreakMinutes] = useState(5)
+    // Timer settings - SET TO 5 SECONDS FOR TESTING
+    const [workSeconds, setWorkSeconds] = useState(5) // 5 seconds for testing
+    const [breakSeconds, setBreakSeconds] = useState(5) // 5 seconds for break too
     const [customWorkInput, setCustomWorkInput] = useState('25')
     const [customBreakInput, setCustomBreakInput] = useState('5')
 
     // Timer state
-    const [timeLeft, setTimeLeft] = useState(workMinutes * 60)
+    const [timeLeft, setTimeLeft] = useState(5) // Start with 5 seconds
     const [isRunning, setIsRunning] = useState(false)
     const [mode, setMode] = useState<TimerMode>('work')
     const [cycleCount, setCycleCount] = useState(0)
@@ -26,18 +27,80 @@ const PomodoroTimer = () => {
     const [showCustomModal, setShowCustomModal] = useState(false)
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const soundRef = useRef<Audio.Sound | null>(null)
+
+    // Load the alarm sound on mount
+    useEffect(() => {
+        const loadSound = async () => {
+            try {
+                const { sound } = await Audio.Sound.createAsync(
+                    require('@/assets/audio/timer-ringtone.mp3')
+                )
+                soundRef.current = sound
+            } catch (error) {
+                console.error('Error loading alarm sound:', error)
+            }
+        }
+
+        loadSound()
+
+        // Cleanup sound on unmount
+        return () => {
+            if (soundRef.current) {
+                soundRef.current.unloadAsync()
+            }
+        }
+    }, [])
+
+    // Play alarm sound
+    const playAlarmSound = async () => {
+        try {
+            if (soundRef.current) {
+                await soundRef.current.replayAsync()
+            }
+        } catch (error) {
+            console.error('Error playing alarm sound:', error)
+        }
+    }
+
+    // Stop alarm sound
+    const stopAlarmSound = async () => {
+        try {
+            if (soundRef.current) {
+                await soundRef.current.stopAsync()
+            }
+        } catch (error) {
+            console.error('Error stopping alarm sound:', error)
+        }
+    }
 
     // Handle timer completion with useCallback to fix dependency warning
-    const handleTimerComplete = useCallback(() => {
+    const handleTimerComplete = useCallback(async () => {
         setIsRunning(false)
 
-        const result = calculateTimerComplete(mode, cycleCount, breakMinutes, workMinutes)
+        // Play alarm sound
+        await playAlarmSound()
+
+        const result = calculateTimerComplete(mode, cycleCount, breakSeconds, workSeconds)
 
         setMode(result.newMode)
         setTimeLeft(result.newTimeLeft)
         setCycleCount(result.newCycleCount)
-        Alert.alert(result.alertTitle, result.alertMessage)
-    }, [mode, cycleCount, breakMinutes, workMinutes])
+
+        // Show alert and stop sound when user clicks OK
+        Alert.alert(
+            result.alertTitle,
+            result.alertMessage,
+            [
+                {
+                    text: 'OK',
+                    onPress: async () => {
+                        await stopAlarmSound()
+                    }
+                }
+            ]
+        )
+    }, [mode, cycleCount, breakSeconds, workSeconds])
 
     // Timer countdown effect
     useEffect(() => {
@@ -67,15 +130,15 @@ const PomodoroTimer = () => {
     const resetTimer = () => {
         setIsRunning(false)
         setMode('work')
-        setTimeLeft(workMinutes * 60)
+        setTimeLeft(5) // 5 seconds for testing
         setCycleCount(0)
     }
 
     const handlePresetStart = () => {
-        setWorkMinutes(25)
-        setBreakMinutes(5)
+        setWorkSeconds(5) // 5 seconds
+        setBreakSeconds(5) // 5 seconds
         setMode('work')
-        setTimeLeft(25 * 60)
+        setTimeLeft(5) // 5 seconds
         setCycleCount(0)
         setIsRunning(false)
     }
@@ -138,7 +201,7 @@ const PomodoroTimer = () => {
                     className="w-full h-16 bg-pink-300 p-4 flex justify-center items-center rounded-xl"
                     onPress={handlePresetStart}
                 >
-                    <Text className="font-bold">25 minutes work + 5 mins break</Text>
+                    <Text className="font-bold">5 seconds work + 5 seconds break (TESTING)</Text>
                 </Pressable>
 
                 <Pressable

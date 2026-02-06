@@ -51,25 +51,25 @@ export const getModeColor = (mode: TimerMode): string => {
 export const calculateTimerComplete = (
     currentMode: TimerMode,
     cycleCount: number,
-    breakMinutes: number,
-    workMinutes: number
+    breakSeconds: number,
+    workSeconds: number
 ): TimerCompleteResult => {
     if (currentMode === 'work') {
         const newCycleCount = cycleCount + 1
 
-        // Every 3 cycles, give a 30-minute long break
+        // Every 3 cycles, give a long break (for testing, use 5 seconds instead of 30 minutes)
         if (newCycleCount % 3 === 0) {
             return {
                 newMode: 'longBreak',
-                newTimeLeft: 30 * 60,
+                newTimeLeft: 5, // 5 seconds for testing (normally would be 30 * 60)
                 newCycleCount,
                 alertTitle: 'Work Complete!',
-                alertMessage: 'Great job! Time for a 30-minute extended break! 🎉'
+                alertMessage: 'Great job! Time for a 5-second extended break! 🎉 (Testing)'
             }
         } else {
             return {
                 newMode: 'break',
-                newTimeLeft: breakMinutes * 60,
+                newTimeLeft: breakSeconds,
                 newCycleCount,
                 alertTitle: 'Work Complete!',
                 alertMessage: 'Time for a break! ☕'
@@ -78,7 +78,7 @@ export const calculateTimerComplete = (
     } else {
         return {
             newMode: 'work',
-            newTimeLeft: workMinutes * 60,
+            newTimeLeft: workSeconds,
             newCycleCount: cycleCount,
             alertTitle: 'Break Complete!',
             alertMessage: 'Ready to get back to work? 💪'

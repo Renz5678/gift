@@ -11,14 +11,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Alert, Modal, Pressable, Text, TextInput, View } from 'react-native'
 
 const PomodoroTimer = () => {
-    // Timer settings - SET TO 5 SECONDS FOR TESTING
-    const [workSeconds, setWorkSeconds] = useState(5) // 5 seconds for testing
-    const [breakSeconds, setBreakSeconds] = useState(5) // 5 seconds for break too
+    // Timer settings
+    const [workSeconds, setWorkSeconds] = useState(25 * 60) // 25 minutes
+    const [breakSeconds, setBreakSeconds] = useState(5 * 60) // 5 minutes
     const [customWorkInput, setCustomWorkInput] = useState('25')
     const [customBreakInput, setCustomBreakInput] = useState('5')
 
     // Timer state
-    const [timeLeft, setTimeLeft] = useState(5) // Start with 5 seconds
+    const [timeLeft, setTimeLeft] = useState(25 * 60) // Start with 25 minutes
     const [isRunning, setIsRunning] = useState(false)
     const [mode, setMode] = useState<TimerMode>('work')
     const [cycleCount, setCycleCount] = useState(0)
@@ -130,15 +130,15 @@ const PomodoroTimer = () => {
     const resetTimer = () => {
         setIsRunning(false)
         setMode('work')
-        setTimeLeft(5) // 5 seconds for testing
+        setTimeLeft(25 * 60) // 25 minutes
         setCycleCount(0)
     }
 
     const handlePresetStart = () => {
-        setWorkSeconds(5) // 5 seconds
-        setBreakSeconds(5) // 5 seconds
+        setWorkSeconds(25 * 60) // 25 minutes
+        setBreakSeconds(5 * 60) // 5 minutes
         setMode('work')
-        setTimeLeft(5) // 5 seconds
+        setTimeLeft(25 * 60) // 25 minutes
         setCycleCount(0)
         setIsRunning(false)
     }
@@ -151,8 +151,8 @@ const PomodoroTimer = () => {
             return
         }
 
-        setWorkMinutes(validation.work!)
-        setBreakMinutes(validation.breakTime!)
+        setWorkSeconds(validation.work! * 60) // Convert minutes to seconds
+        setBreakSeconds(validation.breakTime! * 60) // Convert minutes to seconds
         setMode('work')
         setTimeLeft(validation.work! * 60)
         setCycleCount(0)

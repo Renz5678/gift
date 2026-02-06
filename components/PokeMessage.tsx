@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, Text, View } from 'react-native';
 
@@ -17,10 +18,45 @@ const PokeMessage = ({
     const [sending, setSending] = useState(false);
     const { userEmail } = useAuth();
 
+    // Helper function to format remaining cooldown time
+    const formatCooldownTime = (milliseconds: number): string => {
+        const minutes = Math.floor(milliseconds / 60000);
+        const seconds = Math.floor((milliseconds % 60000) / 1000);
+
+        if (minutes > 0) {
+            return `${minutes} minute${minutes > 1 ? 's' : ''} and ${seconds} second${seconds !== 1 ? 's' : ''}`;
+        }
+        return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    };
+
     const handleSend = async () => {
         setSending(true);
 
         try {
+            const LAST_POKE_KEY = `@last_poke_time_${userEmail}`;
+            const cooldownPeriod = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+            // Check local cooldown first (faster than database query)
+            const lastPokeTimeStr = await AsyncStorage.getItem(LAST_POKE_KEY);
+            if (lastPokeTimeStr) {
+                const lastPokeTime = parseInt(lastPokeTimeStr, 10);
+                const currentTime = new Date().getTime();
+                const timeDifference = currentTime - lastPokeTime;
+
+                if (timeDifference < cooldownPeriod) {
+                    const remainingTime = cooldownPeriod - timeDifference;
+                    const formattedTime = formatCooldownTime(remainingTime);
+                    Alert.alert(
+                        'Cooldown Active ⏰',
+                        `Please wait ${formattedTime} before sending another poke!`,
+                        [{ text: 'OK' }]
+                    );
+                    setSending(false);
+                    setShowModal(false);
+                    return;
+                }
+            }
+
             // Get partner email from user_pairs
             const { data: pairData, error: pairError } = await supabase
                 .from('user_pairs')
@@ -32,6 +68,37 @@ const PokeMessage = ({
                 Alert.alert('Error', 'You need to pair with your partner first!');
                 setSending(false);
                 return;
+            }
+
+            // Double-check with database (in case of multiple devices or cleared storage)
+            const { data: recentPoke, error: cooldownError } = await supabase
+                .from('pokes')
+                .select('sent_at')
+                .eq('sender_email', userEmail)
+                .eq('receiver_email', pairData.partner_email)
+                .order('sent_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (!cooldownError && recentPoke) {
+                const lastPokeTime = new Date(recentPoke.sent_at).getTime();
+                const currentTime = new Date().getTime();
+                const timeDifference = currentTime - lastPokeTime;
+
+                if (timeDifference < cooldownPeriod) {
+                    const remainingTime = cooldownPeriod - timeDifference;
+                    const formattedTime = formatCooldownTime(remainingTime);
+                    Alert.alert(
+                        'Cooldown Active ⏰',
+                        `Please wait ${formattedTime} before sending another poke!`,
+                        [{ text: 'OK' }]
+                    );
+                    setSending(false);
+                    setShowModal(false);
+                    // Update local storage with the actual last poke time
+                    await AsyncStorage.setItem(LAST_POKE_KEY, lastPokeTime.toString());
+                    return;
+                }
             }
 
             // Send poke to database
@@ -49,6 +116,8 @@ const PokeMessage = ({
                 Alert.alert('Error', 'Failed to send poke. Please try again.');
                 console.error('Poke error:', pokeError);
             } else {
+                // Update last poke time in AsyncStorage
+                await AsyncStorage.setItem(LAST_POKE_KEY, new Date().getTime().toString());
                 Alert.alert('Sent! 💕', 'Your poke has been sent to your partner!');
                 setShowModal(false);
                 onPress(); // Deselect the message

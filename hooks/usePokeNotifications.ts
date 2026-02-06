@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
@@ -13,6 +14,39 @@ interface Poke {
     sent_at: string;
     read_at: string | null;
 }
+
+const SHOWN_NOTIFICATIONS_KEY = '@poke_shown_notifications';
+
+// Helper functions to track shown notifications
+const getShownNotifications = async (): Promise<string[]> => {
+    try {
+        const shown = await AsyncStorage.getItem(SHOWN_NOTIFICATIONS_KEY);
+        return shown ? JSON.parse(shown) : [];
+    } catch (error) {
+        console.error('Error getting shown notifications:', error);
+        return [];
+    }
+};
+
+const markNotificationAsShown = async (pokeId: string): Promise<void> => {
+    try {
+        const shown = await getShownNotifications();
+        if (!shown.includes(pokeId)) {
+            shown.push(pokeId);
+            await AsyncStorage.setItem(SHOWN_NOTIFICATIONS_KEY, JSON.stringify(shown));
+        }
+    } catch (error) {
+        console.error('Error marking notification as shown:', error);
+    }
+};
+
+const clearShownNotifications = async (): Promise<void> => {
+    try {
+        await AsyncStorage.removeItem(SHOWN_NOTIFICATIONS_KEY);
+    } catch (error) {
+        console.error('Error clearing shown notifications:', error);
+    }
+};
 
 export const usePokeNotifications = () => {
     const { userEmail } = useAuth();
@@ -74,9 +108,12 @@ export const usePokeNotifications = () => {
 
             if (!error && data) {
                 setUnreadPokes(data);
-                // Show notifications for queued pokes
+                // Only show notifications for pokes that haven't been shown yet
+                const shownNotifications = await getShownNotifications();
                 data.forEach((poke) => {
-                    showPokeNotification(poke);
+                    if (!shownNotifications.includes(poke.id)) {
+                        showPokeNotification(poke);
+                    }
                 });
             }
         };
@@ -137,6 +174,9 @@ export const usePokeNotifications = () => {
             },
             trigger: null, // Show immediately
         });
+
+        // Mark this notification as shown
+        await markNotificationAsShown(poke.id);
     };
 
     const markAsRead = async (pokeId: string) => {
@@ -161,6 +201,8 @@ export const usePokeNotifications = () => {
 
         if (!error) {
             setUnreadPokes([]);
+            // Clear shown notifications when all are marked as read
+            await clearShownNotifications();
         }
     };
 

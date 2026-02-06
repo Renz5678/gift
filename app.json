@@ -2,6 +2,7 @@
   "expo": {
     "name": "Mayo!",
     "slug": "confidential",
+    "icon": "./assets/icons/piggie.png",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "confidential",

@@ -131,42 +131,14 @@ export default function TabsLayout() {
             fontSize: 16,
             lineHeight: 24,
           },
-          tabBarLabel: "Cleoh",
+          tabBarLabel: "Our Story",
           headerStyle: {
             backgroundColor: "#e6657a",
           },
           tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../../assets/icons/pucca-logo.png')}
-              style={{ width: size, height: size }}
-              resizeMode="contain" />
+            <Ionicons name="heart" size={size} color={color} />
           ),
           tabBarActiveBackgroundColor: "#c23d6b9a",
-          tabBarActiveTintColor: "black"
-        }}
-      />
-
-      <Tabs.Screen
-        name="Matthew"
-        options={{
-          title: "Batman's Rogue Gallery",
-          headerTitleStyle: {
-            fontFamily: "BatmanFont",
-            color: "white",
-            fontSize: 16,
-            lineHeight: 24,
-          },
-          tabBarLabel: "Matthew",
-          headerStyle: {
-            backgroundColor: "black",
-          },
-          tabBarIcon: ({ color, size }) => (
-            <Image
-              source={require('../../assets/icons/batman-logo.png')}
-              style={{ width: size, height: size }}
-              resizeMode="contain" />
-          ),
-          tabBarActiveBackgroundColor: "#1620759a",
           tabBarActiveTintColor: "black"
         }}
       />

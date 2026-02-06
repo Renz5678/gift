@@ -37,17 +37,22 @@ const More = () => {
     };
 
     const checkIfPaired = async () => {
+        console.log('Checking if paired for user:', userEmail);
         const { data, error } = await supabase
             .from('user_pairs')
             .select('*')
             .or(`user_email.eq.${userEmail},partner_email.eq.${userEmail}`)
             .eq('status', 'accepted')
-            .single();
+            .limit(1);
 
-        if (!error && data) {
+        console.log('Pair check result:', { data, error });
+
+        if (data && data.length > 0 && !error) {
             setHasPair(true);
-            // Get partner email
-            const partnerEmail = data.user_email === userEmail ? data.partner_email : data.user_email;
+            // Get partner email from first result
+            const pairData = data[0];
+            const partnerEmail = pairData.user_email === userEmail ? pairData.partner_email : pairData.user_email;
+            console.log('Partner email:', partnerEmail);
 
             // Fetch partner's username
             const { data: partnerData } = await supabase
@@ -56,8 +61,10 @@ const More = () => {
                 .eq('email', partnerEmail)
                 .single();
 
+            console.log('Partner data:', partnerData);
             setMyPartnerEmail(partnerData?.username || partnerEmail);
         } else {
+            console.log('No pair found or error occurred');
             setHasPair(false);
             setMyPartnerEmail(null);
         }
@@ -335,19 +342,14 @@ const More = () => {
                     </View>
 
                     <Pressable
-                        className={`p-4 border-2 border-red-400 w-full h-20 justify-center ${hasPair ? 'bg-green-100' : ''}`}
+                        className={`p-4 border-2 border-red-400 w-full h-20 justify-center ${hasPair ? 'bg-gray-200' : ''}`}
                         onPress={hasPair ? undefined : handlePairWith}
                         disabled={hasPair}
                     >
                         {hasPair ? (
-                            <View>
-                                <Text className='text-lg font-bold text-green-600 text-center'>
-                                    ✓ You are now paired!
-                                </Text>
-                                <Text className='text-sm text-gray-600 text-center mt-1'>
-                                    {myPartnerEmail}
-                                </Text>
-                            </View>
+                            <Text className='text-lg text-gray-600 text-center'>
+                                You are already paired with {myPartnerEmail}
+                            </Text>
                         ) : (
                             <Text className='text-xl font-semibold'>
                                 Pair with Partner

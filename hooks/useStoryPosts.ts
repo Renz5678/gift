@@ -61,21 +61,57 @@ export const useStoryPosts = (userEmail: string | null, username: string | null)
             .on(
                 'postgres_changes',
                 {
-                    event: '*',
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'story_posts',
                 },
                 (payload) => {
-                    console.log('Real-time update:', payload);
-                    fetchPosts(); // Refetch all posts on any change
+                    console.log('Real-time INSERT:', payload);
+                    const newPost = payload.new as StoryPost;
+                    setPosts((currentPosts) => [newPost, ...currentPosts]);
                 }
             )
-            .subscribe();
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'story_posts',
+                },
+                (payload) => {
+                    console.log('Real-time UPDATE:', payload);
+                    const updatedPost = payload.new as StoryPost;
+                    setPosts((currentPosts) =>
+                        currentPosts.map((post) =>
+                            post.id === updatedPost.id ? updatedPost : post
+                        )
+                    );
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'story_posts',
+                },
+                (payload) => {
+                    console.log('Real-time DELETE:', payload);
+                    const deletedPost = payload.old as StoryPost;
+                    setPosts((currentPosts) =>
+                        currentPosts.filter((post) => post.id !== deletedPost.id)
+                    );
+                }
+            )
+            .subscribe((status) => {
+                console.log('Subscription status:', status);
+            });
 
         return () => {
             supabase.removeChannel(channel);
         };
     }, []);
+
 
     // Create a new post
     const createPost = async (title: string, content: string, imageUri?: string): Promise<boolean> => {

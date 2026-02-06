@@ -1,4 +1,5 @@
 import { getThemeConfig } from '@/utils/themeUtils';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Alert, Image, Pressable, Text, View } from 'react-native';
 
@@ -57,11 +58,15 @@ const CleohCard = ({
             {/* Header with icon and delete button */}
             <View className="flex-row justify-between items-start mb-2">
                 <View className="flex-row items-center flex-1">
-                    <Image
-                        source={theme.iconSource}
-                        resizeMode="contain"
-                        style={{ width: 32, height: 32, marginRight: 8 }}
-                    />
+                    {theme.iconSource === 'ionicon-heart' ? (
+                        <Ionicons name="heart" size={32} color="#6b7280" style={{ marginRight: 8 }} />
+                    ) : (
+                        <Image
+                            source={theme.iconSource}
+                            resizeMode="contain"
+                            style={{ width: 32, height: 32, marginRight: 8 }}
+                        />
+                    )}
                     <Text className={`${theme.titleColor} text-2xl font-bold flex-1`}>{title}</Text>
                 </View>
                 {canDelete && (

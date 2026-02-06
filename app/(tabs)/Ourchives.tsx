@@ -1,12 +1,16 @@
 import AddStoryModal from '@/components/AddStoryModal';
 import CleohCard from "@/components/CleohCard";
+import SkeletonCard from '@/components/SkeletonCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStoryNotifications } from '@/hooks/useStoryNotifications';
 import { useStoryPosts } from '@/hooks/useStoryPosts';
 import { getFABIcon } from '@/utils/themeUtils';
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Image, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import '../../global.css';
+
+
 
 const Ourchives = () => {
     const { userEmail, username } = useAuth();
@@ -57,11 +61,13 @@ const Ourchives = () => {
 
                     {/* Loading State */}
                     {loading && posts.length === 0 && (
-                        <View className="w-full items-center justify-center py-20">
-                            <ActivityIndicator size="large" color="#ec4899" />
-                            <Text className="text-gray-600 mt-4">Loading stories...</Text>
-                        </View>
+                        <>
+                            <SkeletonCard />
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </>
                     )}
+
 
                     {/* Error State */}
                     {error && (
@@ -103,14 +109,18 @@ const Ourchives = () => {
 
             {/* Floating Action Button */}
             <Pressable
-                className="w-16 h-16 bg-pink-300 rounded-full absolute bottom-6 right-6 flex justify-center items-center shadow-lg"
+                className={`w-16 h-16 ${getFABIcon(username || '', userEmail || '') === 'ionicon-heart' ? 'bg-gray-400' : 'bg-pink-300'} rounded-full absolute bottom-6 right-6 flex justify-center items-center shadow-lg`}
                 onPress={() => setModalVisible(true)}
             >
-                <Image
-                    source={getFABIcon(username || '', userEmail || '')}
-                    resizeMode="contain"
-                    style={{ height: 40, width: 40 }}
-                />
+                {getFABIcon(username || '', userEmail || '') === 'ionicon-heart' ? (
+                    <Ionicons name="heart" size={28} color="#ffffff" />
+                ) : (
+                    <Image
+                        source={getFABIcon(username || '', userEmail || '')}
+                        resizeMode="contain"
+                        style={{ height: 40, width: 40 }}
+                    />
+                )}
             </Pressable>
 
             {/* Add Story Modal */}

@@ -33,11 +33,11 @@ export const THEME_CONFIGS: Record<ThemeType, ThemeConfig> = {
     },
     default: {
         type: 'default',
-        cardBackground: 'bg-blue-50',
-        titleColor: 'text-blue-600',
-        textColor: 'text-gray-800',
-        iconSource: require('../assets/icons/pucca-logo.png'), // Using pucca as fallback icon
-        accentColor: 'border-blue-400',
+        cardBackground: 'bg-gray-100',
+        titleColor: 'text-gray-700',
+        textColor: 'text-gray-600',
+        iconSource: 'ionicon-heart', // Will be handled specially in the component
+        accentColor: 'border-gray-400',
     },
 };
 
@@ -85,6 +85,6 @@ export const getFABIcon = (username: string, email?: string): any => {
         return require('../assets/icons/ribbon-add.png');
     }
     // Default icon for other users
-    return require('../assets/icons/ribbon-add.png');
+    return 'ionicon-heart';
 };
 
